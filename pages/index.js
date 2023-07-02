@@ -4,6 +4,7 @@ import { Inter } from 'next/font/google'
 import Layout from '@/components/layout/Layout';
 
 
+
 const inter = Inter({ subsets: ['latin'] })
 
 const dummyMeetups=[
@@ -19,9 +20,16 @@ const dummyMeetups=[
     address: 'City-abc',
     description: 'This is the Second Meetup'
   },
+  {
+    id: 'm3',
+    title: 'The Third meetup',
+    address: 'City-abc',
+    description: 'This is the Third Meetup'
+  }
 ]
 
-export default function Home() {
+export default function Home(props) {
+ 
   return (
     <>
       <Head>
@@ -32,10 +40,18 @@ export default function Home() {
       </Head>
       <main>
      
-      <MeetupList meetups={dummyMeetups} />
+      <MeetupList meetups={props.meetups} />
      
        
       </main>
     </>
   )
+}
+
+export async function getStaticProps(){
+  return{
+    props: {
+      meetups: dummyMeetups
+    }
+  }
 }
