@@ -2,7 +2,7 @@ import Head from 'next/head'
 import MeetupList from '@/components/meetups/MeetupList';
 import { Inter } from 'next/font/google'
 import Layout from '@/components/layout/Layout';
-
+import { MongoClient } from 'mongodb';
 
 
 const inter = Inter({ subsets: ['latin'] })
@@ -49,9 +49,23 @@ export default function Home(props) {
 }
 
 export async function getStaticProps(){
+
+  const client= await MongoClient.connect('mongodb+srv://debashisneog23:debashisneog23@cluster0.fnaucoa.mongodb.net/meetups?retryWrites=true&w=majority')
+    
+
+  const db= client.db()
+  const meetupCollection= db.collection('meetups');
+  const meetups= await meetupCollection.find().toArray()
+  client.close();
+
   return{
     props: {
-      meetups: dummyMeetups
+      meetups:meetups.map(meetup => ({
+        title: meetup.title,
+        address: meetup.address,
+        description: meetup.description,
+        id: meetup._id.toString()
+      }))
     }
   }
 }
