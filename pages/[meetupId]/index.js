@@ -1,45 +1,46 @@
-function MeetupDetails(){
+import { MongoClient, ObjectId } from "mongodb";
+
+function MeetupDetails(props){
     return(
         <>
-            <h1>A First Meetup</h1>
-            <address>City-abc</address>
-            <p>This is the first Meetup</p>
+            <h1>{props.meetupDates.title}</h1>
+            <address>{props.meetupDates.address}</address>
+            <p>{props.meetupDates.description}</p>
         </>
     )
 }
 export async function getStaticPaths(){
+
+    const client= await MongoClient.connect('mongodb+srv://debashisneog23:debashisneog23@cluster0.fnaucoa.mongodb.net/meetups?retryWrites=true&w=majority')
+    
+
+  const db= client.db()
+  const meetupCollection= db.collection('meetups');
+  const meetups= await meetupCollection.find({}, {_id: 1}).toArray();
+  client.close();
     return{
         fallback:false,
-        paths:[
-            {
-                params: {
-                    meetupId: 'm1'
-                }
-            },
-            {
-                params: {
-                    meetupId: 'm2'
-                }
-            },
-            {
-                params: {
-                    meetupId: 'm3'
-                }
-            },
-        ]
-
-        
+        paths: meetups.map(meetup => ({ params: {meetupId: meetup._id.toString()},
+    }))         
     }
 }
  export async function getStaticProps(context){
-   const meetupID=  context.params.meetupId
+    const meetupId = context.params.meetupId
+    const client= await MongoClient.connect('mongodb+srv://debashisneog23:debashisneog23@cluster0.fnaucoa.mongodb.net/meetups?retryWrites=true&w=majority')
+    
+
+    const db= client.db()
+    const meetupCollection= db.collection('meetups');
+    const selectedMeetup= await meetupCollection.findOne({_id: new ObjectId(meetupId)})
+    client.close();
+ 
     return{
         props:{
-            meetupDates:{
-                id: meetupID,
-               title: 'A First Meetup',
-               address: 'City-abc',
-               description: 'This is the first Meetup'
+            meetupDates: {
+                id: selectedMeetup._id.toString(),
+                title: selectedMeetup.title,
+                description: selectedMeetup.description,
+                address: selectedMeetup.address
             }
         }
     }
